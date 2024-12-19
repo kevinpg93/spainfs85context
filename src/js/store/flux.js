@@ -1,45 +1,89 @@
 const getState = ({ getStore, getActions, setStore }) => {
-	return {
-		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
-		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
-			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
-			},
-			changeColor: (index, color) => {
-				//get the store
-				const store = getStore();
+    return {
+        store: {
+            contacts: [],
+            selectedContact: null,
+        },
+        //GET
+        actions: {
+            getContacts: async () => {
+                try {
+                    const response = await fetch("https://playground.4geeks.com/contact/agendas/Kevin/contacts");
+                    // if (!response.ok) throw new Error("Failed to fetch data");
+                    const data = await response.json();
+                    setStore({ contacts: data.contacts });
+                    console.log(data);
 
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
-				});
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            },
+            //POST
+            addContact: async (newContact) => {
 
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
-	};
+
+                try {
+                    const response = await fetch("https://playground.4geeks.com/contact/agendas/Kevin/contacts", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(newContact)
+                    });
+                    if (response.ok) {
+                        getActions().getContacts()
+                    };
+                    const data = await response.json();
+                    console.log(data);
+
+                } catch (error) {
+                    console.error("Error adding item:", error);
+                }
+            },
+            //DELETE
+            deleteContact: async (id) => {
+                try {
+                    const response = await fetch(`https://playground.4geeks.com/contact/agendas/Kevin/contacts/${id}`, {
+                        method: "DELETE"
+                    });
+                    if (response.ok) {
+                        getActions().getContacts()
+                    };
+                } catch (error) {
+                    console.error("Error deleting item:", error);
+                }
+            },
+            //PUT
+            editContacts: async (id, newItem) => {
+                try {
+                    const response = await fetch(`https://playground.4geeks.com/contact/agendas/Kevin/contacts/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(newItem)
+                    });
+                    if (response.ok) {
+                        getActions().getContacts()
+                    };
+                    const addedItem = await response.json();
+                } catch (error) {
+                    console.error("Error adding item:", error);
+                }
+            },
+            changeColor: (index, color) => {
+                const store = getStore();
+                const demo = store.demo.map((elm, i) => {
+                    if (i === index) elm.background = color;
+                    return elm;
+                });
+                setStore({ demo: demo });
+            },
+            setContact: (id) => {
+                const contact = getStore().contacts.filter((item) => item.id === id)
+                setStore({ selectedContact: contact })
+            }
+        }
+    };
 };
-
 export default getState;
