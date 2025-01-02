@@ -1,4 +1,4 @@
-import React,{useState, useContext} from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Context } from "../store/appContext";
 import { useNavigate } from "react-router-dom";
@@ -11,33 +11,31 @@ const EditContacts = () => {
     const [phone, setPhone] = useState("")
     const [address, setAddress] = useState("")
     const params = useParams()
-    // useEffect(() => {
-    //     actions.setContact(params.id); 
-    // }, [params.id]);
-    // useEffect(() => {
-    //     if (store.selectedContact) {
-    //         setFullName(store.selectedContact[0]?.name || "");
-    //         setEmail(store.selectedContact[0]?.email || "");
-    //         setPhone(store.selectedContact[0]?.phone || "");
-    //         setAddress(store.selectedContact[0]?.address || "");
-    //     }
-    // }, [store.selectedContact]);
-    const navigate = useNavigate() 
+
+    useEffect(() => {
+        const contacToEdit = store.contacts.filter(contact => contact.id === parseInt(params.id))[0]
+        if (contacToEdit) {
+            setFullName(contacToEdit.name || "");
+            setEmail(contacToEdit.email || "");
+            setPhone(contacToEdit.phone || "");
+            setAddress(contacToEdit.address || "");
+        }
+    }, [store.selectedContact]);
+    const navigate = useNavigate()
     const contact = {
         name: fullName,
         phone: phone,
         email: email,
         address: address,
     }
+    
+
     const editSubmit = () => {
-        actions.editContacts(id, contact)
+        actions.editContacts(params.id, contact)
         navigate("/")
     }
-    // useEffect(() => {
-    //     console.log(store.selectedContact);
-    //     console.log(store.contacts);
-    // }, [store.selectedContact]
-    
+
+
     return (
         <div className="container">
             <ul className="list-group">
